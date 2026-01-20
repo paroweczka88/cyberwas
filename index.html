@@ -6,44 +6,52 @@
 
 <style>
 body {
+    background: #0f0f0f;
+    color: #f5f5f5;
     font-family: Arial, sans-serif;
-    background: #111;
-    color: #eee;
     text-align: center;
     padding-top: 40px;
 }
 
 .container {
-    max-width: 500px;
+    max-width: 600px;
     margin: auto;
-    background: #1c1c1c;
+    background: #1a1a1a;
     padding: 30px;
-    border-radius: 10px;
+    border-radius: 12px;
 }
 
-img {
-    max-width: 200px;
+/* WIELKI WĄS */
+.logo {
+    width: 350px;
+    max-width: 90%;
     margin-bottom: 20px;
 }
 
-input, button {
-    padding: 10px;
-    font-size: 16px;
+#timer {
+    font-size: 28px;
+    margin: 20px 0;
+    color: #ff9800;
+    font-weight: bold;
 }
 
-#timer {
-    font-size: 24px;
-    margin: 20px 0;
-    color: orange;
+input, button {
+    padding: 12px;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+button {
+    cursor: pointer;
 }
 
 .success {
-    color: #00ff88;
+    color: #00ff99;
     font-weight: bold;
 }
 
 .fail {
-    color: red;
+    color: #ff4d4d;
     font-weight: bold;
 }
 </style>
@@ -54,16 +62,17 @@ input, button {
 <div class="container">
 
     <!-- LOGO -->
-    <img src="was.png" alt="Logo wąsa">
+    <img src="was.png" class="logo" alt="Wielki Wąs">
 
     <h1>🧩 ZAGADKA</h1>
     <p>Co ma klucze, ale nie ma drzwi?</p>
 
     <!-- TIMER -->
-    <div id="timer">⏳ Pozostało: 02:00</div>
+    <div id="timer">⏳ Odliczanie...</div>
 
-    <!-- INPUT -->
+    <!-- HASŁO -->
     <input type="text" id="odpowiedz" placeholder="Wpisz hasło">
+    <br>
     <button onclick="sprawdz()">Sprawdź</button>
 
     <div id="wynik"></div>
@@ -71,39 +80,42 @@ input, button {
 </div>
 
 <script>
-/* ===== TIMER ===== */
-let czas = 120; // sekundy (2 minuty)
+/* ===== DATA KOŃCOWA ===== */
+const deadline = new Date("2025-01-31T21:00:00").getTime();
 const timerEl = document.getElementById("timer");
 
+/* ===== ODLICZANIE ===== */
 const timer = setInterval(() => {
-    const min = Math.floor(czas / 60);
-    const sec = czas % 60;
+    const now = new Date().getTime();
+    const diff = deadline - now;
 
-    timerEl.innerHTML = `⏳ Pozostało: ${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
-
-    if (czas <= 0) {
+    if (diff <= 0) {
         clearInterval(timer);
-        timerEl.innerHTML = "☣️ WĄSOWIRUS AKTYWOWANY!";
+        timerEl.innerHTML = "☣️ CZAS MINĄŁ";
         timerEl.style.color = "red";
         document.getElementById("wynik").innerHTML =
-            "<p class='fail'>❌ Czas minął. Misja nieudana.</p>";
+            "<p class='fail'>❌ Operacja zakończona niepowodzeniem.</p>";
+        return;
     }
 
-    czas--;
+    const dni = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const godz = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const min = Math.floor((diff / (1000 * 60)) % 60);
+    const sek = Math.floor((diff / 1000) % 60);
+
+    timerEl.innerHTML = `⏳ ${dni}d ${godz}h ${min}m ${sek}s`;
 }, 1000);
 
 /* ===== SPRAWDZANIE HASŁA ===== */
 function sprawdz() {
-    const poprawna = "fortepian";
+    const poprawna = "fortepian"; // ZMIEŃ HASŁO
     const wpisana = document.getElementById("odpowiedz").value.toLowerCase();
     const wynik = document.getElementById("wynik");
 
-    if (wpisana === poprawna && czas > 0) {
-        clearInterval(timer);
+    if (wpisana === poprawna) {
         wynik.innerHTML = `
             <p class="success">✅ DOSTĘP PRZYZNANY</p>
-            <p>🔓 Protokół WĄS zatrzymany.</p>
-            <p>➡️ Kolejna wskazówka: „Spójrz pod nosem…”</p>
+            <p>🧠 Zegar zatrzymany.</p>
         `;
     } else {
         wynik.innerHTML = "<p class='fail'>❌ Błędne hasło</p>";
