@@ -1,46 +1,112 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <title>Zagadka</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 60px;
-        }
-        input, button {
-            padding: 10px;
-            font-size: 16px;
-        }
-        #wynik {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Operacja WĄS</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #eee;
+    text-align: center;
+    padding-top: 40px;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: #1c1c1c;
+    padding: 30px;
+    border-radius: 10px;
+}
+
+img {
+    max-width: 200px;
+    margin-bottom: 20px;
+}
+
+input, button {
+    padding: 10px;
+    font-size: 16px;
+}
+
+#timer {
+    font-size: 24px;
+    margin: 20px 0;
+    color: orange;
+}
+
+.success {
+    color: #00ff88;
+    font-weight: bold;
+}
+
+.fail {
+    color: red;
+    font-weight: bold;
+}
+</style>
 </head>
+
 <body>
 
-<h1>🧩 Zagadka</h1>
-<p>Co ma klucze, ale nie ma drzwi?</p>
+<div class="container">
 
-<input type="text" id="odpowiedz" placeholder="Wpisz odpowiedź">
-<button onclick="sprawdz()">Sprawdź</button>
+    <!-- LOGO -->
+    <img src="was.png" alt="Logo wąsa">
 
-<div id="wynik"></div>
+    <h1>🧩 ZAGADKA</h1>
+    <p>Co ma klucze, ale nie ma drzwi?</p>
+
+    <!-- TIMER -->
+    <div id="timer">⏳ Pozostało: 02:00</div>
+
+    <!-- INPUT -->
+    <input type="text" id="odpowiedz" placeholder="Wpisz hasło">
+    <button onclick="sprawdz()">Sprawdź</button>
+
+    <div id="wynik"></div>
+
+</div>
 
 <script>
+/* ===== TIMER ===== */
+let czas = 120; // sekundy (2 minuty)
+const timerEl = document.getElementById("timer");
+
+const timer = setInterval(() => {
+    const min = Math.floor(czas / 60);
+    const sec = czas % 60;
+
+    timerEl.innerHTML = `⏳ Pozostało: ${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+
+    if (czas <= 0) {
+        clearInterval(timer);
+        timerEl.innerHTML = "☣️ WĄSOWIRUS AKTYWOWANY!";
+        timerEl.style.color = "red";
+        document.getElementById("wynik").innerHTML =
+            "<p class='fail'>❌ Czas minął. Misja nieudana.</p>";
+    }
+
+    czas--;
+}, 1000);
+
+/* ===== SPRAWDZANIE HASŁA ===== */
 function sprawdz() {
-    const poprawna = "fortepian"; // <-- TU WPISZ POPRAWNĄ ODPOWIEDŹ
+    const poprawna = "fortepian";
     const wpisana = document.getElementById("odpowiedz").value.toLowerCase();
     const wynik = document.getElementById("wynik");
 
-    if (wpisana === poprawna) {
-        wynik.style.color = "green";
-        wynik.innerHTML = "✅ Brawo! Odpowiedź to: FORTepian 🎹";
+    if (wpisana === poprawna && czas > 0) {
+        clearInterval(timer);
+        wynik.innerHTML = `
+            <p class="success">✅ DOSTĘP PRZYZNANY</p>
+            <p>🔓 Protokół WĄS zatrzymany.</p>
+            <p>➡️ Kolejna wskazówka: „Spójrz pod nosem…”</p>
+        `;
     } else {
-        wynik.style.color = "red";
-        wynik.innerHTML = "❌ To nie jest poprawna odpowiedź. Spróbuj jeszcze raz.";
+        wynik.innerHTML = "<p class='fail'>❌ Błędne hasło</p>";
     }
 }
 </script>
