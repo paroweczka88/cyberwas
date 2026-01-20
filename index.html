@@ -1,71 +1,101 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<title>Operacja WĄS</title>
+  <meta charset="UTF-8">
+  <title>CyberWąs</title>
 
-<style>
-body {
-    background: #0f0f0f;
-    color: #f5f5f5;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding-top: 40px;
-}
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #111 0%, #000 60%);
+      font-family: Arial, sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-.container {
-    max-width: 600px;
-    margin: auto;
-    background: #1a1a1a;
-    padding: 30px;
-    border-radius: 12px;
-}
+    .container {
+      background: rgba(20, 20, 20, 0.9);
+      padding: 30px 40px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(0, 255, 120, 0.2);
+      max-width: 420px;
+      width: 100%;
+    }
 
-/* WIELKI WĄS */
-.logo {
-    width: 350px;
-    max-width: 90%;
-    margin-bottom: 20px;
-}
+    .logo {
+      max-width: 280px;
+      margin-bottom: 20px;
+    }
 
-#timer {
-    font-size: 28px;
-    margin: 20px 0;
-    color: #ff9800;
-    font-weight: bold;
-}
+    #zagadkatxt {
+      font-size: 18px;
+      margin-bottom: 20px;
+      opacity: 0.9;
+    }
 
-input, button {
-    padding: 12px;
-    font-size: 16px;
-    margin-top: 10px;
-}
+    #timer {
+      font-size: 26px;
+      font-weight: bold;
+      color: orange;
+      margin-bottom: 20px;
+    }
 
-button {
-    cursor: pointer;
-}
+    input {
+      padding: 10px;
+      width: 80%;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 10px;
+    }
 
-.success {
-    color: #00ff99;
-    font-weight: bold;
-}
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background: #00c853;
+      color: #000;
+      font-weight: bold;
+    }
 
-.fail {
-    color: #ff4d4d;
-    font-weight: bold;
-}
-</style>
+    button:hover {
+      background: #00e676;
+    }
+
+    #wynik {
+      margin-top: 15px;
+      font-size: 16px;
+    }
+
+    .success {
+      color: #00e676;
+      font-weight: bold;
+    }
+
+    .fail {
+      color: #ff5252;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-    <!-- LOGO -->
+    <!-- WĄS -->
     <img src="was.png" class="logo" alt="Wielki Wąs">
 
-    <h1>🧩 ZAGADKA</h1>
-    <p>Co ma klucze, ale nie ma drzwi?</p>
+    <!-- TEKST ZAGADKI – TU WPISZ SWÓJ -->
+    <p id="zagadkatxt">
+      Tu wpiszesz swoją zagadkę 🧠
+    </p>
 
     <!-- TIMER -->
     <div id="timer">⏳ Odliczanie...</div>
@@ -77,52 +107,53 @@ button {
 
     <div id="wynik"></div>
 
-</div>
+  </div>
 
-<script>
-/* ===== DATA KOŃCOWA ===== */
-const deadline = new Date("2026-01-31T21:00:00").getTime();
-const timerEl = document.getElementById("timer");
+  <script>
+    const endDate = new Date("January 31, 2025 21:00:00").getTime();
+    let timerStopped = false;
 
-/* ===== ODLICZANIE ===== */
-const timer = setInterval(() => {
-    const now = new Date().getTime();
-    const diff = deadline - now;
+    function updateTimer() {
+      if (timerStopped) return;
 
-    if (diff <= 0) {
-        clearInterval(timer);
-        timerEl.innerHTML = "☣️ CZAS MINĄŁ";
-        timerEl.style.color = "red";
-        document.getElementById("wynik").innerHTML =
-            "<p class='fail'>❌ Operacja zakończona niepowodzeniem.</p>";
+      const now = new Date().getTime();
+      const distance = endDate - now;
+
+      if (distance <= 0) {
+        document.getElementById("timer").innerHTML = "⏰ Czas minął";
         return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById("timer").innerHTML =
+        `⏳ ${days}d ${hours}h ${minutes}m ${seconds}s`;
     }
 
-    const dni = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const godz = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const min = Math.floor((diff / (1000 * 60)) % 60);
-    const sek = Math.floor((diff / 1000) % 60);
+    setInterval(updateTimer, 1000);
+    updateTimer();
 
-    timerEl.innerHTML = `⏳ ${dni}d ${godz}h ${min}m ${sek}s`;
-}, 1000);
+    function sprawdz() {
+      const poprawne = ["wąs", "wąsisko", "koper", "wąsik"];
+      const wpis = document.getElementById("odpowiedz").value
+        .toLowerCase()
+        .trim();
 
-/* ===== SPRAWDZANIE HASŁA ===== */
-function sprawdz() {
-    const poprawna = "fortepian"; // ZMIEŃ HASŁO
-    const wpisana = document.getElementById("odpowiedz").value.toLowerCase();
-    const wynik = document.getElementById("wynik");
+      const wynik = document.getElementById("wynik");
 
-    if (wpisana === poprawna) {
-        wynik.innerHTML = `
-            <p class="success">✅ DOSTĘP PRZYZNANY</p>
-            <p>🧠 Zegar zatrzymany.</p>
-        `;
-    } else {
-        wynik.innerHTML = "<p class='fail'>❌ Błędne hasło</p>";
+      if (poprawne.includes(wpis)) {
+        wynik.innerHTML = "✅ DOSTĘP PRZYZNANY<br>🧠 Zegar zatrzymany.";
+        wynik.className = "success";
+        timerStopped = true;
+      } else {
+        wynik.innerHTML = "❌ Zła odpowiedź. Próbuj dalej.";
+        wynik.className = "fail";
+      }
     }
-}
-</script>
+  </script>
 
 </body>
 </html>
-
