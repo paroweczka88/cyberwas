@@ -13,7 +13,7 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
-/* MATRIX CANVAS */
+/* MATRIX */
 #matrix {
   position: fixed;
   top: 0;
@@ -43,16 +43,10 @@ body {
 /* WĄS */
 #was {
   width: 340px;
-  display: block;
   margin: 0 auto 25px;
   cursor: pointer;
   filter: drop-shadow(0 0 14px #00ff88);
-  transform: rotate(180deg); /* <<< OBRÓT */
-  transition: transform 0.2s ease, filter 0.2s ease;
-}
-
-#was:hover {
-  animation: pulse 1.2s infinite;
+  transform: rotate(180deg);
 }
 
 /* TEXT */
@@ -107,19 +101,13 @@ button:hover {
   font-weight: bold;
 }
 
-/* ANIMACJE */
+/* ANIM */
 @keyframes shake {
-  0% { transform: translate(0,0) rotate(180deg); }
-  25% { transform: translate(-3px,2px) rotate(180deg); }
-  50% { transform: translate(3px,-2px) rotate(180deg); }
-  75% { transform: translate(-2px,1px) rotate(180deg); }
-  100% { transform: translate(0,0) rotate(180deg); }
-}
-
-@keyframes pulse {
-  0% { filter: drop-shadow(0 0 6px #00ff88); }
-  50% { filter: drop-shadow(0 0 18px #00ff88); }
-  100% { filter: drop-shadow(0 0 6px #00ff88); }
+  0% { transform: rotate(180deg) translate(0,0); }
+  25% { transform: rotate(180deg) translate(-3px,2px); }
+  50% { transform: rotate(180deg) translate(3px,-2px); }
+  75% { transform: rotate(180deg) translate(-2px,1px); }
+  100% { transform: rotate(180deg) translate(0,0); }
 }
 </style>
 </head>
@@ -130,9 +118,13 @@ button:hover {
 
 <div class="container">
 
-  <!-- WĄS SVG -->
+  <!-- WĄS -->
   <svg id="was" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
-    <path fill="white" d="M100 150 C200 50 300 50 400 150 C500 50 600 50 700 150 C600 200 500 250 400 200 C300 250 200 200 100 150 Z"/>
+    <path fill="white"
+      d="M100 150 C200 50 300 50 400 150
+         C500 50 600 50 700 150
+         C600 200 500 250 400 200
+         C300 250 200 200 100 150 Z"/>
   </svg>
 
   <!-- ZAGADKA -->
@@ -144,7 +136,7 @@ button:hover {
   </p>
 
   <!-- TIMER -->
-  <div id="timer">⏳ Odliczanie...</div>
+  <div id="timer"></div>
   <div id="custom-text">✏️ Ten tekst możesz dowolnie zmienić</div>
 
   <!-- HASŁO -->
@@ -181,22 +173,24 @@ function drawMatrix() {
     drops[i]++;
   });
 }
-
 setInterval(drawMatrix, 50);
 
 /* TIMER */
+const timer = document.getElementById("timer");
 const endDate = new Date("January 31, 2026 21:00:00").getTime();
+
 setInterval(() => {
   const now = Date.now();
   const d = endDate - now;
+
   if (d > 0) {
     const days = Math.floor(d / 86400000);
     const h = Math.floor((d / 3600000) % 24);
     const m = Math.floor((d / 60000) % 60);
     const s = Math.floor((d / 1000) % 60);
-    timer.innerHTML = `⏳ ${days}d ${h}h ${m}m ${s}s`;
+    timer.textContent = `${days}d ${h}h ${m}m ${s}s`;
   } else {
-    timer.innerHTML = "⏰ Czas minął";
+    timer.textContent = "Czas minął";
   }
 }, 1000);
 
@@ -205,7 +199,7 @@ function playAudio(file){
   new Audio(file).play();
 }
 
-/* WĄS INTERAKCJA */
+/* WĄS */
 const was = document.getElementById("was");
 was.addEventListener("click", () => {
   playAudio("audio/was_click.mp3");
