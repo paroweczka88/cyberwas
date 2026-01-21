@@ -13,7 +13,7 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
-/* MATRIX CANVAS */
+/* MATRIX */
 #matrix {
   position: fixed;
   top: 0;
@@ -21,7 +21,7 @@ html, body {
   z-index: 0;
 }
 
-/* CONTENT */
+/* BODY */
 body {
   display: flex;
   justify-content: center;
@@ -29,6 +29,7 @@ body {
   color: #fff;
 }
 
+/* CONTAINER */
 .container {
   position: relative;
   z-index: 2;
@@ -43,16 +44,11 @@ body {
 /* WĄS */
 #was {
   width: 340px;
-  display: block;
   margin: 0 auto 25px;
+  display: block;
   cursor: pointer;
   filter: drop-shadow(0 0 14px #00ff88);
-  transition: transform 0.2s ease, filter 0.2s ease;
-  transform: rotate(180deg); /* ⬅️ OBRÓT WĄSA */
-}
-
-#was:hover {
-  animation: pulse 1.2s infinite;
+  transform: rotate(180deg);
 }
 
 /* TEXT */
@@ -110,16 +106,10 @@ button:hover {
 /* ANIMACJE */
 @keyframes shake {
   0% { transform: rotate(180deg) translate(0,0); }
-  25% { transform: rotate(180deg) translate(-3px,2px); }
-  50% { transform: rotate(180deg) translate(3px,-2px); }
+  25% { transform: rotate(180deg) translate(-4px,2px); }
+  50% { transform: rotate(180deg) translate(4px,-2px); }
   75% { transform: rotate(180deg) translate(-2px,1px); }
   100% { transform: rotate(180deg) translate(0,0); }
-}
-
-@keyframes pulse {
-  0% { filter: drop-shadow(0 0 6px #00ff88); }
-  50% { filter: drop-shadow(0 0 18px #00ff88); }
-  100% { filter: drop-shadow(0 0 6px #00ff88); }
 }
 </style>
 </head>
@@ -132,22 +122,26 @@ button:hover {
 
   <!-- WĄS SVG -->
   <svg id="was" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
-    <path fill="white" d="M100 150 C200 50 300 50 400 150 C500 50 600 50 700 150 C600 200 500 250 400 200 C300 250 200 200 100 150 Z"/>
+    <path fill="white"
+      d="M100 150
+         C200 50 300 50 400 150
+         C500 50 600 50 700 150
+         C600 200 500 250 400 200
+         C300 250 200 200 100 150 Z"/>
   </svg>
 
   <!-- ZAGADKA -->
   <p class="text-block">
-    Nie raz myślałeś, że nie jest Ci w nim do twarzy.
-    Że bardziej zabiera Ci urok niż sprawia, że jesteś
-    szanowany. Wśród małych dzieci powoduje gęsią skórkę.
-    Bo każdy młodzian wie jaką masz rurkę. Powiadają, że
-    nawet ściany mają je w swoim arsenale, ale uważaj bo
-    zbyt długo noszony sprawia, że skończysz w kakale.
+    TU WPISZ SWOJĄ ZAGADKĘ.  
+    TEKST JEST WYJUSTOWANY  
+    I ŁADNIE SIĘ SKŁADA.
   </p>
 
   <!-- TIMER -->
   <div id="timer"></div>
-  <div id="custom-text">do aktywacji pedowirusa</div>
+  <div id="custom-text">
+    ✏️ TU MOŻESZ WPISAĆ DOWOLNY AUTORSKI TEKST
+  </div>
 
   <!-- HASŁO -->
   <input id="odpowiedz" placeholder="Wpisz hasło">
@@ -155,27 +149,24 @@ button:hover {
   <button onclick="sprawdz()">Sprawdź</button>
 
   <div id="wynik" class="text-block"></div>
+
 </div>
 
 <script>
-/* AUDIO */
-function playAudio(file){
-  new Audio(file).play();
-}
-
-/* INTRO AUDIO – po pierwszym kliknięciu */
-let introPlayed = false;
-function playIntro() {
-  if (introPlayed) return;
+/* INTRO AUDIO */
+window.addEventListener("click", () => {
   playAudio("intro.MP3");
-  introPlayed = true;
+}, { once: true });
+
+/* AUDIO */
+function playAudio(file) {
+  const audio = new Audio(file);
+  audio.play();
 }
-document.addEventListener("click", playIntro, { once: true });
 
 /* MATRIX */
 const canvas = document.getElementById("matrix");
 const ctx = canvas.getContext("2d");
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -200,9 +191,12 @@ function drawMatrix() {
 setInterval(drawMatrix, 50);
 
 /* TIMER */
+const timer = document.getElementById("timer");
 const endDate = new Date("January 31, 2026 21:00:00").getTime();
+
 setInterval(() => {
-  const d = endDate - Date.now();
+  const now = Date.now();
+  const d = endDate - now;
   if (d > 0) {
     const days = Math.floor(d / 86400000);
     const h = Math.floor((d / 3600000) % 24);
@@ -210,27 +204,34 @@ setInterval(() => {
     const s = Math.floor((d / 1000) % 60);
     timer.textContent = `${days}d ${h}h ${m}m ${s}s`;
   } else {
-    timer.textContent = "Czas minął";
+    timer.textContent = "⏰ Czas minął";
   }
 }, 1000);
 
-/* WĄS INTERAKCJA */
+/* WĄS – 3 KLIKNIĘCIA */
 const was = document.getElementById("was");
+let wasClicks = 0;
+
 was.addEventListener("click", () => {
-  playAudio("was_click.MP3");
+  wasClicks++;
   was.style.animation = "shake 0.4s";
   setTimeout(() => was.style.animation = "", 400);
+
+  if (wasClicks === 3) {
+    playAudio("secret.MP3");
+    wasClicks = 0;
+  }
 });
 
 /* HASŁO */
-function sprawdz(){
+function sprawdz() {
   const poprawne = ["wąs","wąsik","wąsisko","koper"];
   const wpis = odpowiedz.value.toLowerCase().trim();
   const wynik = document.getElementById("wynik");
 
-  if(poprawne.includes(wpis)){
+  if (poprawne.includes(wpis)) {
     wynik.textContent =
-      "Aby wstrzymać działanie pedowirusa, nie gól wonsa do końca styczniusa.";
+      "Aby wstrzymać działanie pedowirusa, zapuść 〰️ i nie gól go do końca styczniusa.";
     wynik.className = "success";
     playAudio("good.MP3");
   } else {
@@ -243,6 +244,3 @@ function sprawdz(){
 
 </body>
 </html>
-
-
-
