@@ -47,6 +47,7 @@ body {
   margin: 0 auto 25px;
   cursor: pointer;
   filter: drop-shadow(0 0 14px #00ff88);
+  transform: rotate(180deg); /* <<< OBRÓT */
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
@@ -108,11 +109,11 @@ button:hover {
 
 /* ANIMACJE */
 @keyframes shake {
-  0% { transform: translate(0,0); }
-  25% { transform: translate(-3px,2px); }
-  50% { transform: translate(3px,-2px); }
-  75% { transform: translate(-2px,1px); }
-  100% { transform: translate(0,0); }
+  0% { transform: translate(0,0) rotate(180deg); }
+  25% { transform: translate(-3px,2px) rotate(180deg); }
+  50% { transform: translate(3px,-2px) rotate(180deg); }
+  75% { transform: translate(-2px,1px) rotate(180deg); }
+  100% { transform: translate(0,0) rotate(180deg); }
 }
 
 @keyframes pulse {
