@@ -3,94 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <title>CyberWąs</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-html, body {
+body {
   margin: 0;
-  padding: 0;
+  min-height: 100vh;
   background: black;
-  color: #ddd;
-  font-family: Consolas, monospace;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
 }
 
 /* MATRIX */
 canvas {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   z-index: 0;
 }
 
-/* KARTA */
+/* PANEL */
 .container {
   position: relative;
-  z-index: 2;
-  width: 360px;
-  margin: 80px auto;
-  padding: 30px;
-  background: rgba(0,0,0,0.8);
-  border-radius: 12px;
-  box-shadow: 0 0 30px #00ff88;
+  z-index: 1;
+  background: rgba(10, 10, 10, 0.85);
+  padding: 30px 40px;
+  border-radius: 14px;
   text-align: center;
+  box-shadow: 0 0 40px rgba(0,255,120,0.25);
+  max-width: 420px;
+  width: 100%;
 }
 
 /* WĄS */
 #was {
-  width: 340px;
-  margin: 0 auto 25px;
-  display: block;
+  width: 260px;
   cursor: pointer;
-  transform: rotate(180deg);
-  filter: drop-shadow(0 0 14px #00ff88);
-  transition: transform 0.2s, filter 0.2s;
+  margin-bottom: 20px;
+  animation: shake 1.5s infinite;
+  filter: drop-shadow(0 0 10px #00ff88);
 }
 
-/* ANIMACJE */
 @keyframes shake {
-  0% { transform: rotate(180deg) translateX(0); }
-  25% { transform: rotate(180deg) translateX(-5px); }
-  50% { transform: rotate(180deg) translateX(5px); }
-  75% { transform: rotate(180deg) translateX(-5px); }
-  100% { transform: rotate(180deg) translateX(0); }
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
 }
 
-@keyframes glowFlash {
-  0% { filter: drop-shadow(0 0 5px #00ff88); }
-  25% { filter: drop-shadow(0 0 25px #00ff88); }
-  50% { filter: drop-shadow(0 0 10px #00ff88); }
-  75% { filter: drop-shadow(0 0 30px #00ff88); }
-  100% { filter: drop-shadow(0 0 14px #00ff88); }
+/* TEKST */
+.text-block {
+  text-align: justify;
+  line-height: 1.6;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+#timer {
+  font-size: 22px;
+  color: orange;
+  margin-bottom: 8px;
+}
+
+#after-timer {
+  font-size: 14px;
+  opacity: 0.75;
+  margin-bottom: 15px;
 }
 
 /* INPUT */
 input {
-  width: 100%;
   padding: 10px;
+  width: 80%;
+  font-size: 16px;
   border-radius: 6px;
   border: none;
-  margin-top: 15px;
 }
 
 button {
-  margin-top: 12px;
-  padding: 10px;
-  width: 100%;
-  background: #00ff88;
-  border: none;
+  margin-top: 10px;
+  padding: 10px 22px;
+  font-size: 16px;
   border-radius: 6px;
-  font-weight: bold;
+  border: none;
   cursor: pointer;
+  background: #00c853;
+  font-weight: bold;
 }
 
-.success { color: #00ff88; }
-.fail { color: #ff4444; }
-
-.timer {
-  margin: 15px 0;
-  font-size: 20px;
-  color: orange;
-}
+.success { color: #00ff88; font-weight: bold; }
+.fail { color: #ff5252; font-weight: bold; }
 </style>
 </head>
 
@@ -100,46 +106,59 @@ button {
 
 <div class="container">
 
-  <!-- WĄS -->
-  <img src="was.svg" id="was" alt="CyberWąs">
+<!-- WĄS SVG -->
+<svg id="was" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- TU JEST TWÓJ PATH – NIE RUSZAMY -->
+  <path d="M2390 3213 c-113 -16 ... (skrócone, masz pełne u siebie)" fill="white"/>
+</svg>
 
-  <p>
-    Nie raz myślałeś, że nie jest Ci w nim do twarzy.
-    Że bardziej zabiera Ci urok niż sprawia, że jesteś szanowany.
-  </p>
+<p class="text-block">
+  <!-- TU WPISZESZ SWOJĄ ZAGADKĘ -->
+  Tu wpiszesz własny tekst zagadki. Ma być ładnie wyjustowany i tajemniczy.
+</p>
 
-  <div class="timer" id="timer">⏳ --</div>
+<div id="timer">⏳ Ładowanie czasu...</div>
+<div id="after-timer">Tu wpiszesz autorski tekst pod timerem.</div>
 
-  <input id="input" placeholder="hasło">
-  <button onclick="sprawdz()">Sprawdź</button>
+<input id="odpowiedz" placeholder="Wpisz hasło">
+<br>
+<button onclick="sprawdz()">Sprawdź</button>
 
-  <p id="wynik"></p>
+<div id="wynik" class="text-block"></div>
 
 </div>
 
 <script>
-/* AUDIO */
-function playSound(name) {
-  const audio = new Audio(`audio/${name}.mp3`);
-  audio.volume = 0.7;
-  audio.play().catch(() => {});
-}
+/* MATRIX */
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+const chars = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%";
+const drops = Array(Math.floor(canvas.width / 20)).fill(0);
 
-/* START SOUND */
-document.addEventListener("click", function first() {
-  playSound("enter");
-  document.removeEventListener("click", first);
-});
+function matrix() {
+  ctx.fillStyle = "rgba(0,0,0,0.1)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = "#00ff88";
+  ctx.font = "16px monospace";
+  drops.forEach((y,i)=>{
+    const text = chars[Math.floor(Math.random()*chars.length)];
+    ctx.fillText(text, i*20, y*20);
+    drops[i] = y*20 > canvas.height && Math.random()>0.975 ? 0 : y+1;
+  });
+}
+setInterval(matrix, 50);
 
 /* TIMER */
-const target = new Date("2025-01-31T21:00:00");
+const endDate = new Date("January 31, 2026 21:00:00");
 
 function updateTimer() {
   const now = new Date();
-  const diff = target - now;
+  const diff = endDate - now;
 
   if (diff <= 0) {
-    timer.textContent = "⏰ CZAS MINĄŁ";
+    document.getElementById("timer").textContent = "⏰ Czas minął";
     return;
   }
 
@@ -148,72 +167,27 @@ function updateTimer() {
   const m = Math.floor(diff / 60000) % 60;
   const s = Math.floor(diff / 1000) % 60;
 
-  timer.textContent = `⏳ ${d}d ${h}h ${m}m ${s}s`;
+  document.getElementById("timer").textContent =
+    `⏳ ${d}d ${h}h ${m}m ${s}s`;
 }
 setInterval(updateTimer, 1000);
 updateTimer();
 
-/* SPRAWDZANIE */
+/* HASŁO */
 function sprawdz() {
-  const v = input.value.trim().toLowerCase();
-  if (v === "wąs" || v === "was") {
-    wynik.textContent = "✅ POPRAWNA ODPOWIEDŹ";
-    wynik.className = "success";
-    playSound("success");
+  const poprawne = ["wąs","wąsisko","koper","wąsik"];
+  const wpis = odpowiedz.value.toLowerCase().trim();
+  const wynik = document.getElementById("wynik");
+
+  if (poprawne.includes(wpis)) {
+    wynik.textContent =
+      "Aby wstrzymać działanie pedowirusa, zapuść 〰️ i nie gól go do końca stycznia.";
+    wynik.className = "success text-block";
   } else {
-    wynik.textContent = "❌ ZŁA ODPOWIEDŹ";
-    wynik.className = "fail";
-    playSound("error");
+    wynik.textContent = "❌ Zła odpowiedź. Próbuj dalej.";
+    wynik.className = "fail text-block";
   }
 }
-
-/* WĄS INTERAKCJA + SEKRET */
-let wasClicks = 0;
-const was = document.getElementById("was");
-
-was.addEventListener("click", () => {
-  wasClicks++;
-  playSound("click");
-
-  was.style.animation = "glowFlash 0.6s, shake 0.4s";
-  setTimeout(() => was.style.animation = "", 600);
-
-  if (wasClicks === 3) {
-    playSound("secret");
-    wasClicks = 0;
-  }
-});
-
-/* MATRIX */
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const chars = "アカサタナ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const fontSize = 16;
-const columns = canvas.width / fontSize;
-const drops = Array(Math.floor(columns)).fill(1);
-
-function drawMatrix() {
-  ctx.fillStyle = "rgba(0,0,0,0.08)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  ctx.fillStyle = "#00ff88";
-  ctx.font = fontSize + "px monospace";
-
-  for (let i = 0; i < drops.length; i++) {
-    const text = chars[Math.floor(Math.random()*chars.length)];
-    ctx.fillText(text, i*fontSize, drops[i]*fontSize);
-
-    if (drops[i]*fontSize > canvas.height && Math.random() > 0.975)
-      drops[i] = 0;
-
-    drops[i]++;
-  }
-}
-setInterval(drawMatrix, 35);
 </script>
 
 </body>
