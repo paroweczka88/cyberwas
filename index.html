@@ -167,7 +167,7 @@ function playAudio(file){
 let introPlayed = false;
 function playIntro() {
   if (introPlayed) return;
-  playAudio("audio/intro.MP3");
+  playAudio("intro.MP3");
   introPlayed = true;
 }
 document.addEventListener("click", playIntro, { once: true });
@@ -217,7 +217,7 @@ setInterval(() => {
 /* WĄS INTERAKCJA */
 const was = document.getElementById("was");
 was.addEventListener("click", () => {
-  playAudio("audio/was_click.MP3");
+  playAudio("was_click.MP3");
   was.style.animation = "shake 0.4s";
   setTimeout(() => was.style.animation = "", 400);
 });
@@ -232,16 +232,17 @@ function sprawdz(){
     wynik.textContent =
       "Aby wstrzymać działanie pedowirusa, nie gól wonsa do końca styczniusa.";
     wynik.className = "success";
-    playAudio("audio/good.MP3");
+    playAudio("good.MP3");
   } else {
     wynik.textContent = "❌ Zła odpowiedź. Próbuj dalej.";
     wynik.className = "fail";
-    playAudio("audio/bad.MP3");
+    playAudio("bad.MP3");
   }
 }
 </script>
 
 </body>
 </html>
+
 
 
