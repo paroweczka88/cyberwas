@@ -5,38 +5,55 @@
   <title>CyberWąs</title>
 
   <style>
+    /* ===== MATRIX TŁO ===== */
     body {
       margin: 0;
       min-height: 100vh;
-      background: radial-gradient(circle at top, #111 0%, #000 60%);
       font-family: Arial, sans-serif;
       color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
+      background: black;
     }
 
+    canvas#matrix {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    /* ===== KONTENER ===== */
     .container {
-      background: rgba(20, 20, 20, 0.9);
+      position: relative;
+      z-index: 2;
+      background: rgba(10, 10, 10, 0.88);
       padding: 30px 40px;
       border-radius: 12px;
       text-align: center;
-      box-shadow: 0 0 40px rgba(0, 255, 120, 0.2);
+      box-shadow: 0 0 40px rgba(0, 255, 120, 0.25);
       max-width: 420px;
       width: 100%;
     }
 
+    /* ===== WĄS ===== */
     #was {
       max-width: 280px;
-      margin-bottom: 20px;
+      margin: 0 auto 20px;
+      display: block;
       cursor: pointer;
-      fill: #00e676;
-      filter: drop-shadow(0 0 8px rgba(0, 255, 120, 0.5));
+      filter: drop-shadow(0 0 8px #00ff88);
+      transition: transform 0.2s ease;
+    }
+
+    #was:hover {
+      transform: scale(1.05);
     }
 
     .text-block {
       text-align: justify;
-      text-justify: inter-word;
       line-height: 1.65;
       font-size: 16px;
       opacity: 0.9;
@@ -46,10 +63,10 @@
       font-size: 24px;
       font-weight: bold;
       color: orange;
-      margin-bottom: 5px;
+      margin: 15px 0 5px;
     }
 
-    #custom-text {
+    .editable-text {
       font-size: 14px;
       opacity: 0.75;
       margin-bottom: 20px;
@@ -93,33 +110,40 @@
 
 <body>
 
+<!-- MATRIX CANVAS -->
+<canvas id="matrix"></canvas>
+
 <div class="container">
 
   <!-- WĄS SVG -->
   <svg
     id="was"
-    viewBox="0 0 800 300"
+    viewBox="0 0 6000 3500"
     xmlns="http://www.w3.org/2000/svg">
-    <!-- TU JEST TWÓJ PATH – NIE RUSZAM -->
-    <path d="M2390 3213 c-113 -16 -280 -83 ... (reszta patha bez zmian)" />
+    <path
+      fill="#00ff88"
+      d="M2390 3213 c-113 -16 -280 -83 -390 -156 -115 -77 -280 -209 -378 -302
+      ... (TU ZOSTAWIASZ CAŁĄ ŚCIEŻKĘ BEZ ZMIAN) ..."
+    />
   </svg>
 
   <!-- ZAGADKA -->
-  <p id="zagadkatxt" class="text-block">
+  <p class="text-block">
     Nie raz myślałeś, że nie jest Ci w nim do twarzy.
     Że bardziej zabiera Ci urok niż sprawia, że jesteś
     szanowany. Wśród małych dzieci powoduje gęsią skórkę.
-    Bo każdy młodzian wie jaką masz rurkę. Powiadają, że
-    nawet ściany mają je w swoim arsenale, ale uważaj bo
-    zbyt długo noszony sprawia, że skończysz w kakale.
+    Bo każdy młodzian wie jaką masz rurkę.
+    Powiadają, że nawet ściany mają je w swoim arsenale,
+    ale uważaj bo zbyt długo noszony sprawia,
+    że skończysz w kakale.
   </p>
 
   <!-- TIMER -->
   <div id="timer">⏳ Odliczanie...</div>
 
-  <!-- EDYTOWALNY TEKST -->
-  <div id="custom-text">
-    ✍️ Ten tekst możesz dowolnie zmienić bez ruszania JS
+  <!-- TEKST EDYTOWALNY -->
+  <div class="editable-text">
+    ✏️ Ten tekst możesz dowolnie zmienić bez ruszania JS
   </div>
 
   <!-- HASŁO -->
@@ -132,53 +156,90 @@
 </div>
 
 <script>
-  const endDate = new Date("January 31, 2026 21:00:00").getTime();
+/* ===== TIMER ===== */
+const endDate = new Date("January 31, 2026 21:00:00").getTime();
 
-  function updateTimer() {
-    const now = new Date().getTime();
-    const distance = endDate - now;
+function updateTimer() {
+  const now = new Date();
+  const distance = endDate - now.getTime();
 
-    if (distance > 0) {
-      const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const h = Math.floor((distance / (1000 * 60 * 60)) % 24);
-      const m = Math.floor((distance / (1000 * 60)) % 60);
-      const s = Math.floor((distance / 1000) % 60);
+  if (distance > 0) {
+    const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const h = Math.floor((distance / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((distance / (1000 * 60)) % 60);
+    const s = Math.floor((distance / 1000) % 60);
+    document.getElementById("timer").innerHTML = `⏳ ${d}d ${h}h ${m}m ${s}s`;
+  } else {
+    document.getElementById("timer").innerHTML = "⏰ Czas minął";
+  }
+}
+setInterval(updateTimer, 1000);
+updateTimer();
 
-      document.getElementById("timer").innerHTML =
-        `⏳ ${d}d ${h}h ${m}m ${s}s`;
-    } else {
-      document.getElementById("timer").innerHTML = "⏰ Czas minął";
+/* ===== AUDIO ===== */
+function playAudio(file) {
+  const audio = new Audio(file);
+  audio.play();
+}
+
+document.getElementById("was").onclick = () => {
+  playAudio("audio/was_click.mp3");
+};
+
+/* ===== HASŁO ===== */
+function sprawdz() {
+  const poprawne = ["wąs", "wąsisko", "koper", "wąsik"];
+  const wpis = document.getElementById("odpowiedz").value.toLowerCase().trim();
+  const wynik = document.getElementById("wynik");
+
+  if (poprawne.includes(wpis)) {
+    wynik.innerHTML =
+      "Aby wstrzymać działanie pedowirusa, zapuść 〰️ i nie gól go do końca styczniusa.";
+    wynik.className = "success text-block";
+    playAudio("audio/good.mp3");
+  } else {
+    wynik.innerHTML = "❌ Zła odpowiedź. Próbuj dalej.";
+    wynik.className = "fail text-block";
+    playAudio("audio/bad.mp3");
+  }
+}
+
+/* ===== MATRIX EFFECT ===== */
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const letters = "アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const fontSize = 16;
+const columns = canvas.width / fontSize;
+const drops = Array(Math.floor(columns)).fill(1);
+
+function drawMatrix() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#00ff88";
+  ctx.font = fontSize + "px monospace";
+
+  drops.forEach((y, i) => {
+    const text = letters[Math.floor(Math.random() * letters.length)];
+    ctx.fillText(text, i * fontSize, y * fontSize);
+
+    if (y * fontSize > canvas.height && Math.random() > 0.975) {
+      drops[i] = 0;
     }
-  }
+    drops[i]++;
+  });
+}
 
-  setInterval(updateTimer, 1000);
-  updateTimer();
+setInterval(drawMatrix, 33);
 
-  function playAudio(file) {
-    const audio = new Audio(file);
-    audio.play();
-  }
-
-  document.getElementById("was").onclick = () => {
-    playAudio("audio/was_click.mp3");
-  };
-
-  function sprawdz() {
-    const poprawne = ["wąs", "wąsisko", "koper", "wąsik"];
-    const wpis = document.getElementById("odpowiedz").value.toLowerCase().trim();
-    const wynik = document.getElementById("wynik");
-
-    if (poprawne.includes(wpis)) {
-      wynik.innerHTML =
-        "Aby wstrzymać działanie pedowirusa, zapuść 〰️ i nie gól go do końca styczniusa.";
-      wynik.className = "success text-block";
-      playAudio("audio/good.mp3");
-    } else {
-      wynik.innerHTML = "❌ Zła odpowiedź. Próbuj dalej.";
-      wynik.className = "fail text-block";
-      playAudio("audio/bad.mp3");
-    }
-  }
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
 </script>
 
 </body>
