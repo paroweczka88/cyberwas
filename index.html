@@ -13,7 +13,7 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
-/* MATRIX */
+/* MATRIX CANVAS */
 #matrix {
   position: fixed;
   top: 0;
@@ -43,10 +43,16 @@ body {
 /* WĄS */
 #was {
   width: 340px;
+  display: block;
   margin: 0 auto 25px;
   cursor: pointer;
   filter: drop-shadow(0 0 14px #00ff88);
-  transform: rotate(180deg);
+  transition: transform 0.2s ease, filter 0.2s ease;
+  transform: rotate(180deg); /* ⬅️ OBRÓT WĄSA */
+}
+
+#was:hover {
+  animation: pulse 1.2s infinite;
 }
 
 /* TEXT */
@@ -101,13 +107,19 @@ button:hover {
   font-weight: bold;
 }
 
-/* ANIM */
+/* ANIMACJE */
 @keyframes shake {
   0% { transform: rotate(180deg) translate(0,0); }
   25% { transform: rotate(180deg) translate(-3px,2px); }
   50% { transform: rotate(180deg) translate(3px,-2px); }
   75% { transform: rotate(180deg) translate(-2px,1px); }
   100% { transform: rotate(180deg) translate(0,0); }
+}
+
+@keyframes pulse {
+  0% { filter: drop-shadow(0 0 6px #00ff88); }
+  50% { filter: drop-shadow(0 0 18px #00ff88); }
+  100% { filter: drop-shadow(0 0 6px #00ff88); }
 }
 </style>
 </head>
@@ -118,13 +130,9 @@ button:hover {
 
 <div class="container">
 
-  <!-- WĄS -->
+  <!-- WĄS SVG -->
   <svg id="was" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
-    <path fill="white"
-      d="M100 150 C200 50 300 50 400 150
-         C500 50 600 50 700 150
-         C600 200 500 250 400 200
-         C300 250 200 200 100 150 Z"/>
+    <path fill="white" d="M100 150 C200 50 300 50 400 150 C500 50 600 50 700 150 C600 200 500 250 400 200 C300 250 200 200 100 150 Z"/>
   </svg>
 
   <!-- ZAGADKA -->
@@ -137,7 +145,7 @@ button:hover {
 
   <!-- TIMER -->
   <div id="timer"></div>
-  <div id="custom-text">✏️ Ten tekst możesz dowolnie zmienić</div>
+  <div id="custom-text">do aktywacji pedowirusa</div>
 
   <!-- HASŁO -->
   <input id="odpowiedz" placeholder="Wpisz hasło">
@@ -148,6 +156,20 @@ button:hover {
 </div>
 
 <script>
+/* AUDIO */
+function playAudio(file){
+  new Audio(file).play();
+}
+
+/* INTRO AUDIO – po pierwszym kliknięciu */
+let introPlayed = false;
+function playIntro() {
+  if (introPlayed) return;
+  playAudio("audio/intro.mp3");
+  introPlayed = true;
+}
+document.addEventListener("click", playIntro, { once: true });
+
 /* MATRIX */
 const canvas = document.getElementById("matrix");
 const ctx = canvas.getContext("2d");
@@ -176,13 +198,9 @@ function drawMatrix() {
 setInterval(drawMatrix, 50);
 
 /* TIMER */
-const timer = document.getElementById("timer");
 const endDate = new Date("January 31, 2026 21:00:00").getTime();
-
 setInterval(() => {
-  const now = Date.now();
-  const d = endDate - now;
-
+  const d = endDate - Date.now();
   if (d > 0) {
     const days = Math.floor(d / 86400000);
     const h = Math.floor((d / 3600000) % 24);
@@ -194,12 +212,7 @@ setInterval(() => {
   }
 }, 1000);
 
-/* AUDIO */
-function playAudio(file){
-  new Audio(file).play();
-}
-
-/* WĄS */
+/* WĄS INTERAKCJA */
 const was = document.getElementById("was");
 was.addEventListener("click", () => {
   playAudio("audio/was_click.mp3");
@@ -214,11 +227,12 @@ function sprawdz(){
   const wynik = document.getElementById("wynik");
 
   if(poprawne.includes(wpis)){
-    wynik.innerHTML = "Aby wstrzymać działanie pedowirusa, zapuść 〰️ i nie gól go do końca styczniusa.";
+    wynik.textContent =
+      "Aby wstrzymać działanie pedowirusa, nie gól wonsa do końca styczniusa.";
     wynik.className = "success";
     playAudio("audio/good.mp3");
   } else {
-    wynik.innerHTML = "❌ Zła odpowiedź. Próbuj dalej.";
+    wynik.textContent = "❌ Zła odpowiedź. Próbuj dalej.";
     wynik.className = "fail";
     playAudio("audio/bad.mp3");
   }
