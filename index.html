@@ -29,18 +29,27 @@
     .logo {
       max-width: 280px;
       margin-bottom: 20px;
+      cursor: pointer;
     }
 
-    #zagadkatxt {
-      font-size: 18px;
-      margin-bottom: 20px;
+    .text-block {
+      text-align: justify;
+      text-justify: inter-word;
+      line-height: 1.65;
+      font-size: 16px;
       opacity: 0.9;
     }
 
     #timer {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: bold;
       color: orange;
+      margin-bottom: 5px;
+    }
+
+    #now {
+      font-size: 14px;
+      opacity: 0.7;
       margin-bottom: 20px;
     }
 
@@ -68,11 +77,6 @@
       background: #00e676;
     }
 
-    #wynik {
-      margin-top: 15px;
-      font-size: 16px;
-    }
-
     .success {
       color: #00e676;
       font-weight: bold;
@@ -87,79 +91,86 @@
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <!-- WĄS -->
-    <img src="was.png" class="logo" alt="Wielki Wąs">
+  <!-- WĄS -->
+  <img src="was.png" id="was" class="logo" alt="CyberWąs">
 
-    <!-- TEKST ZAGADKI – TU WPISZ SWÓJ -->
-    <p id="zagadkatxt">
-      Nie raz myślałeś, że nie jest Ci w nim do twarzy.
-      Że bardziej zabiera Ci urok niż sprawia, że jesteś
-      szanowany. Wśród małych dzieci powoduje gęsią skórkę.
-      Bo każdy młodzian wie jaką masz rurkę. Powiadają, że
-      nawet ściany mają je w swoim arsenale, ale uważaj bo
-      zbyt długo noszony sprawia, że skończysz w kakale.
-    </p>
+  <!-- ZAGADKA -->
+  <p id="zagadkatxt" class="text-block">
+    Nie raz myślałeś, że nie jest Ci w nim do twarzy.
+    Że bardziej zabiera Ci urok niż sprawia, że jesteś
+    szanowany. Wśród małych dzieci powoduje gęsią skórkę.
+    Bo każdy młodzian wie jaką masz rurkę. Powiadają, że
+    nawet ściany mają je w swoim arsenale, ale uważaj bo
+    zbyt długo noszony sprawia, że skończysz w kakale.
+  </p>
 
-    <!-- TIMER -->
-    <div id="timer">⏳ Odliczanie...</div>
+  <!-- TIMER -->
+  <div id="timer">⏳ Odliczanie...</div>
+  <div id="now">🕒 Czas aktualny: --:--:--</div>
 
-    <!-- HASŁO -->
-    <input type="text" id="odpowiedz" placeholder="Wpisz hasło">
-    <br>
-    <button onclick="sprawdz()">Sprawdź</button>
+  <!-- HASŁO -->
+  <input type="text" id="odpowiedz" placeholder="Wpisz hasło">
+  <br>
+  <button onclick="sprawdz()">Sprawdź</button>
 
-    <div id="wynik"></div>
+  <div id="wynik" class="text-block"></div>
 
-  </div>
+</div>
 
-  <script>
-    const endDate = new Date("January 31, 2026 21:00:00").getTime();
-    let timerStopped = false;
+<script>
+  const endDate = new Date("January 31, 2026 21:00:00").getTime();
 
-    function updateTimer() {
-      if (timerStopped) return;
+  function updateTimer() {
+    const now = new Date();
+    const distance = endDate - now.getTime();
 
-      const now = new Date().getTime();
-      const distance = endDate - now;
-
-      if (distance <= 0) {
-        document.getElementById("timer").innerHTML = "⏰ Czas minął";
-        return;
-      }
-
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    if (distance > 0) {
+      const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const h = Math.floor((distance / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((distance / (1000 * 60)) % 60);
+      const s = Math.floor((distance / 1000) % 60);
 
       document.getElementById("timer").innerHTML =
-        `⏳ ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        `⏳ ${d}d ${h}h ${m}m ${s}s`;
+    } else {
+      document.getElementById("timer").innerHTML = "⏰ Czas minął";
     }
 
-    setInterval(updateTimer, 1000);
-    updateTimer();
+    document.getElementById("now").innerHTML =
+      `🕒 Czas aktualny: ${now.toLocaleTimeString("pl-PL")}`;
+  }
 
-    function sprawdz() {
-      const poprawne = ["wąs", "wąsisko", "koper", "wąsik"];
-      const wpis = document.getElementById("odpowiedz").value
-        .toLowerCase()
-        .trim();
+  setInterval(updateTimer, 1000);
+  updateTimer();
 
-      const wynik = document.getElementById("wynik");
+  function playAudio(file) {
+    const audio = new Audio(file);
+    audio.play();
+  }
 
-      if (poprawne.includes(wpis)) {
-        wynik.innerHTML = "Aby wstrzymać działanie pedowirusa, zapuść 〰️ i nie gól go do końca styczniusa";
-        wynik.className = "success";
-        timerStopped = true;
-      } else {
-        wynik.innerHTML = "❌ Zła odpowiedź. Próbuj dalej.";
-        wynik.className = "fail";
-      }
+  document.getElementById("was").onclick = () => {
+    playAudio("audio/was_click.mp3");
+  };
+
+  function sprawdz() {
+    const poprawne = ["wąs", "wąsisko", "koper", "wąsik"];
+    const wpis = document.getElementById("odpowiedz").value.toLowerCase().trim();
+    const wynik = document.getElementById("wynik");
+
+    if (poprawne.includes(wpis)) {
+      wynik.innerHTML =
+        "Aby wstrzymać działanie pedowirusa, zapuść 〰️ i nie gól go do końca styczniusa.";
+      wynik.className = "success text-block";
+      playAudio("audio/good.mp3");
+    } else {
+      wynik.innerHTML = "❌ Zła odpowiedź. Próbuj dalej.";
+      wynik.className = "fail text-block";
+      playAudio("audio/bad.mp3");
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>
-
